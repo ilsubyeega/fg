@@ -129,14 +129,8 @@ pub async fn read_log_file(
                 file.seek(SeekFrom::Start(buffer)).await.unwrap();
                 let mut lines = BufReader::new(file).lines();
 
-                while let Ok(line_res) = lines.next_line().await {
-                    match line_res {
-                        Some(line) => {
-                            tx.send(line).await.unwrap();
-                        }
-                        // ignore, can happen when the file was created.
-                        _ => {}
-                    }
+                while let Some(line) = lines.next_line().await.unwrap() {
+                    tx.send(line).await.unwrap();
                 }
 
                 buffer = length;
