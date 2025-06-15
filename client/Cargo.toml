@@ -1,0 +1,13 @@
+[package]
+name = "fg-telemetry-client"
+version = "0.0.0"
+edition = "2024"
+
+[dependencies]
+cached = { version = "0.55.1", features = ["tokio"] }
+dotenvy = "0.15.7"
+notify = "8.0.0"
+regex = "1.11.1"
+serde = { version = "1.0.219", features = ["alloc", "derive"] }
+serde_json = { version = "1.0.140", features = ["alloc", "raw_value"] }
+tokio = { version = "1.45.1", features = ["full"] }
