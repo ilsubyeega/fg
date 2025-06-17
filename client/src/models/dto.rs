@@ -1,6 +1,6 @@
 use super::common::FGRoundBadge;
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FGCompletedEpisodeDto {
     pub kudos: Option<isize>,
     pub fame: Option<isize>,
@@ -9,8 +9,8 @@ pub struct FGCompletedEpisodeDto {
 
     pub rounds: Vec<FGCompletedEpisodeDtoRound>,
 }
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FGCompletedEpisodeDtoRound {
     pub round_order: isize,
     pub round_id_str: String,

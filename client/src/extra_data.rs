@@ -5,14 +5,47 @@ use serde::{Deserialize, Serialize};
 pub static EXTRA_DATA_ASSETS: LazyLock<FGExtraDataAssets> =
     LazyLock::new(initialize_extra_data_assets);
 
+const STR_GAME_RULES: &str = include_str!("../extra_datas/game_rules.json");
 const STR_LEVELS_ROUND: &str = include_str!("../extra_datas/levels_round.json");
 const STR_LOCALIZED_STRINGS: &str = include_str!("../extra_datas/localised_strings.json");
 const STR_SHOWS: &str = include_str!("../extra_datas/shows.json");
 
 pub struct FGExtraDataAssets {
+    pub game_rules: HashMap<String, FGExtraDataGameRulesItem>,
     pub levels_round: HashMap<String, FGExtraDataLevelsRoundItem>,
     pub localized_strings: HashMap<String, String>,
     pub shows: HashMap<String, FGExtraDataShowsItem>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct FGExtraDataGameRulesItem {
+    pub id: String,
+    pub min_participants: Option<isize>,
+    pub max_participants: Option<isize>,
+    pub min_participants_private_lobby: Option<isize>,
+    pub max_participants_private_lobby: Option<isize>,
+    pub qualification_percentage: Option<isize>,
+    pub squads_qualification_percentage: Option<isize>,
+    pub has_timer: Option<bool>,
+    pub duration: isize,
+    pub time_left_red_alert_threshold: isize,
+    pub game_manager_spawn_type: String,
+    pub round_end_condition: String,
+    pub overtime_mode: String,
+    pub overtime_amount: Option<isize>,
+    pub team_mode: String,
+    pub team_count: Option<isize>,
+    pub require_same_team_sizes: Option<bool>,
+    pub required_team_eliminations: Option<isize>,
+    pub is_scoring_game: Option<bool>,
+    pub score_display_mode: String,
+    pub use_creator_score_target: Option<bool>,
+    pub score_target: Option<isize>,
+    pub score_target_squad_2players: Option<isize>,
+    pub score_target_squad_3players: Option<isize>,
+    pub score_target_squad_4players: Option<isize>,
+    pub is_piggyback_enabled: Option<bool>,
+    pub tom_round_rules: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -53,11 +86,13 @@ pub struct FGExtraDataShowsItemShowType {
 }
 
 fn parse_json() -> (
+    Vec<FGExtraDataGameRulesItem>,
     Vec<FGExtraDataLevelsRoundItem>,
     Vec<FGExtraDataLocalizedStringsItem>,
     Vec<FGExtraDataShowsItem>,
 ) {
     (
+        serde_json::from_str(STR_GAME_RULES).unwrap(),
         serde_json::from_str(STR_LEVELS_ROUND).unwrap(),
         serde_json::from_str(STR_LOCALIZED_STRINGS).unwrap(),
         serde_json::from_str(STR_SHOWS).unwrap(),
@@ -65,8 +100,13 @@ fn parse_json() -> (
 }
 
 fn initialize_extra_data_assets() -> FGExtraDataAssets {
-    let (round_item, localized_strings_list, show_item) = parse_json();
+    let (game_rules_vec, round_item, localized_strings_list, show_item) = parse_json();
 
+    let mut game_rules = HashMap::new();
+    for item in game_rules_vec {
+        game_rules.insert(item.id.clone(), item);
+    }
+    
     let mut levels_round = HashMap::new();
     for item in round_item {
         levels_round.insert(item.id.clone(), item);
@@ -83,6 +123,7 @@ fn initialize_extra_data_assets() -> FGExtraDataAssets {
     }
 
     FGExtraDataAssets {
+        game_rules,
         levels_round,
         localized_strings,
         shows,

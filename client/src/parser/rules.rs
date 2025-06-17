@@ -1,5 +1,6 @@
 use std::{str::FromStr, sync::Arc};
 
+use super::create_regex;
 use crate::{
     extra_data::localized_string_round_id,
     models::{
@@ -15,7 +16,6 @@ use crate::{
     models::messages::{FGGameMessage, FGMatchmakingMessage},
     parser::ParseResult,
 };
-use super::create_regex;
 
 fn game_state_changed(input: &str) -> ParseResult<FGGameMessage> {
     if !(input.contains("[GameStateMachine] Replacing ") && input.contains(" with ")) {
