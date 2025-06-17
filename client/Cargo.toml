@@ -10,4 +10,7 @@ notify = "8.0.0"
 regex = "1.11.1"
 serde = { version = "1.0.219", features = ["alloc", "derive"] }
 serde_json = { version = "1.0.140", features = ["alloc", "raw_value"] }
+temporal_rs = { version = "0.0.9", features = ["compiled_data"] }
 tokio = { version = "1.45.1", features = ["full"] }
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
