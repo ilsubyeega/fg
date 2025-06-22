@@ -1,0 +1,62 @@
+div.common-games-ingame-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+div.common-games-ingame-title {
+    display: flex;
+    gap: 8px;
+    color: white;
+    align-items: center;
+
+    div.creative {
+        color: black;
+        background-color: white;
+        padding: 4px 12px;
+        border-radius: 999px;
+    }
+
+    div.title {
+        font-size: 24px;
+    }
+
+    div.creative-code {
+        opacity: 0.8;
+    }
+
+    &:not(.is-creative) {
+        div.creative {
+            display: none;
+            width: 0;
+        }
+
+        div.creative-code {
+            opacity: 0;
+        }
+    }
+}
+
+div.common-games-ingame-attributes {
+    display: flex;
+    gap: 16px;
+    color: white;
+    // FIXME: Firefox somehow wrongly renders the text.
+    white-space: nowrap;
+
+    div.players,
+    div.times,
+    div.qualified {
+        display: flex;
+        gap: 6px;
+    }
+
+    div.times div.time-left {
+        opacity: 0.6;
+    }
+
+    &:not(.is-available) {
+        opacity: 0;
+        height: 0;
+    }
+}
