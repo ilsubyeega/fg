@@ -6,15 +6,24 @@ div.common-games-ingame-header {
 
 div.common-games-ingame-title {
     display: flex;
-    gap: 8px;
     color: white;
     align-items: center;
 
-    div.creative {
-        color: black;
-        background-color: white;
-        padding: 4px 12px;
-        border-radius: 999px;
+    div.creative-wrapped {
+        transition: all 0.4s;
+        display: flex;
+        width: 110px;
+        margin-right: 8px;
+        div.creative {
+            display: flex;
+            flex-shrink: 0;
+            justify-content: center;
+            color: black;
+            background-color: white;
+            padding: 4px 12px;
+            border-radius: 999px;
+            width: 110px - 24px;
+        }
     }
 
     div.title {
@@ -23,12 +32,16 @@ div.common-games-ingame-title {
 
     div.creative-code {
         opacity: 0.8;
+        margin-left: 8px;
+        transition: all 0.4s;
     }
 
     &:not(.is-creative) {
-        div.creative {
-            display: none;
+        div.creative-wrapped {
+            margin-right: 0;
             width: 0;
+            transform: translateX(-110px);
+            opacity: 0;
         }
 
         div.creative-code {
@@ -43,6 +56,8 @@ div.common-games-ingame-attributes {
     color: white;
     // FIXME: Firefox somehow wrongly renders the text.
     white-space: nowrap;
+    transition: all 0.4s;
+    height: 16px;
 
     div.players,
     div.times,
@@ -50,6 +65,13 @@ div.common-games-ingame-attributes {
         display: flex;
         gap: 6px;
     }
+    
+    img {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+    }
+    
 
     div.times div.time-left {
         opacity: 0.6;
