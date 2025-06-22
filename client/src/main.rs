@@ -1,6 +1,6 @@
-use std::{backtrace::Backtrace, env, panic};
+use std::env;
 
-use tracing::error;
+use tracing::debug;
 
 mod extra_data;
 mod models;
@@ -9,13 +9,6 @@ mod parser;
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
-    // Workaround for tokio panic handling.
-    // https://github.com/tokio-rs/tokio/issues/2002#issuecomment-1020443386
-    panic::set_hook(Box::new(|info| {
-        error!("Got panic. @info:{}", info);
-        error!("Backtrace: {}", Backtrace::force_capture());
-        std::process::abort();
-    }));
     dotenvy::dotenv().unwrap();
     let log_dir = &env::var("LOG_DIR").unwrap();
     let log_file = &env::var("LOG_FILE").unwrap();
@@ -25,6 +18,6 @@ async fn main() {
     let reader_rx = parser::task_watch::read_log_file(watch_rx, &file_path).await;
     let mut parser_rx = parser::task_parser::parse_from_str_rx(reader_rx).await;
     while let Some(message) = parser_rx.recv().await {
-        println!("{:?}", message);
+        debug!("{:?}", message);
     }
 }

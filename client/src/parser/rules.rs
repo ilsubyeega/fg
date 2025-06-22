@@ -1,5 +1,7 @@
 use std::{str::FromStr, sync::Arc};
 
+use tracing::warn;
+
 use super::create_regex;
 use crate::{
     extra_data::localized_string_round_id,
@@ -553,13 +555,19 @@ fn game_lobby_rewards(input: &str) -> ParseResult<FGGameMessage> {
         if is_out_of_scope(line) {
             break;
         }
+
+        if round_order > 0 && line.contains(" [CompletedEpisodeDto] ") {
+            warn!("Duplicated log detected. ignoring next dto payload");
+            break;
+        }
+
         if line.contains("[") && line.contains("Round ") && line.contains("]") {
             if round_order != -1 {
                 rounds.push(temp_round);
                 temp_round = generate_fg_completed_episode_dto_round();
             }
             let Some(caps) = title_regex.captures(line) else {
-                println!("line: {}", line);
+                warn!("line: {}", line);
                 return ParseResult::Unreachable;
             };
             let order = caps.name("order").unwrap().as_str().parse().unwrap();
@@ -570,7 +578,7 @@ fn game_lobby_rewards(input: &str) -> ParseResult<FGGameMessage> {
             temp_round.round_display_name = localized_string_round_id(&round_id_str);
         } else if line.contains("> ") && line.contains(": ") {
             let Some(caps) = prop_regex.captures(line) else {
-                println!("line: {}", line);
+                warn!("line: {}", line);
                 return ParseResult::Unreachable;
             };
             let key = caps.name("key").unwrap().as_str();
@@ -586,7 +594,7 @@ fn game_lobby_rewards(input: &str) -> ParseResult<FGGameMessage> {
                 }
             } else {
                 if value.is_empty() {
-                    println!("DTO: {key} is empty value.");
+                    warn!("DTO: {key} is empty value.");
                     continue;
                 }
                 match key {
@@ -601,7 +609,11 @@ fn game_lobby_rewards(input: &str) -> ParseResult<FGGameMessage> {
                     "Bonus Kudos" => temp_round.bonus_kudos = value.parse().unwrap(),
                     "Bonus Fame" => temp_round.bonus_fame = value.parse().unwrap(),
                     "BadgeId" => temp_round.badge_id = value.parse().unwrap(),
-                    _ => unreachable!("Unknown key value {key}"),
+                    _ => {
+                        // FIXME: sometimes parser just get fucked and throws the overall thing
+                        warn!("Unknown key value {key}. value: {input}");
+                        return ParseResult::Unreachable;
+                    }
                 }
             }
         }

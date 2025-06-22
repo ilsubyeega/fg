@@ -26,7 +26,7 @@ pub async fn parse_from_str_rx(
             } else {
                 super::rules::rules()
             };
-            
+
             if temp_buffer.lines().count() > 100 {
                 unreachable!("Parser just read 100 lines of buffer, which should not happen.");
             }
@@ -94,6 +94,10 @@ pub fn try_parse_log_time(log: &str) -> Option<Instant> {
             .unwrap();
 
         // Let temporal-rs handle the timezone information.
+        // FIXME: timezone detection does not work at sandboxed environments
+        // https://github.com/strawlab/iana-time-zone/issues/170
+        // FIXME: Logs are on UTC format not local timezone, i guesss??????
+        // IT is. has first entry with utc0, and then has other tiemzoned time there.
         let zoned_date_time = Temporal::now().zoned_date_time_iso(None).unwrap();
         let Ok(time) = PlainTime::new(hours, minutes, seconds, milliseconds, 0, 0) else {
             warn!(
@@ -102,13 +106,16 @@ pub fn try_parse_log_time(log: &str) -> Option<Instant> {
             );
             continue;
         };
-        zoned_date_time.with_plain_time(Some(time.clone())).unwrap();
-        let Ok(zoned_date_time) = zoned_date_time.with_plain_time(Some(time)) else {
-            warn!(
-                "Could not call ZonedDateTime::with_plain_time which is {}:{}:{}:{}",
-                hours, minutes, seconds, milliseconds
-            );
-            continue;
+        let zoned_date_time = match zoned_date_time.with_plain_time(Some(time)) {
+            Ok(time) => time,
+            Err(err) => {
+                //warn!(
+                //    "Could not call ZonedDateTime::with_plain_time which is {}:{}:{}:{}
+                //    Reason: {}.",
+                //    hours, minutes, seconds, milliseconds, err
+                //);
+                continue;
+            }
         };
 
         let instant = zoned_date_time.to_instant();

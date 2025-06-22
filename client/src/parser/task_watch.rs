@@ -5,6 +5,7 @@ use notify::{
 use std::io::SeekFrom;
 use tokio::{
     fs::OpenOptions,
+    io::AsyncReadExt,
     sync::mpsc::{self, Receiver},
 };
 
@@ -127,8 +128,10 @@ pub async fn read_log_file(
                     .await
                     .unwrap();
                 file.seek(SeekFrom::Start(buffer)).await.unwrap();
-                let mut lines = BufReader::new(file).lines();
 
+                let bufreader = BufReader::new(file);
+                let content = bufreader.take(length - buffer);
+                let mut lines = content.lines();
                 while let Some(line) = lines.next_line().await.unwrap() {
                     tx.send(line).await.unwrap();
                 }
