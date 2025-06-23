@@ -862,8 +862,7 @@ dependencies = [
 [[package]]
 name = "temporal_rs"
 version = "0.0.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7995a53f8d6e4a4dae21067190ee433eb209b7b2b71140c36cec4910c2bc7c37"
+source = "git+https://github.com/boa-dev/temporal?rev=531cee14769e8c077c59a1faf67d5465e85f5afa#531cee14769e8c077c59a1faf67d5465e85f5afa"
 dependencies = [
  "combine",
  "core_maths",
@@ -912,8 +911,7 @@ dependencies = [
 [[package]]
 name = "timezone_provider"
 version = "0.0.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "332757a387cb7e6ce264143e9a103af85c96b3d0fc2fc2126579b52a3d7d95d2"
+source = "git+https://github.com/boa-dev/temporal?rev=531cee14769e8c077c59a1faf67d5465e85f5afa#531cee14769e8c077c59a1faf67d5465e85f5afa"
 dependencies = [
  "zerotrie",
  "zerovec",
@@ -1017,9 +1015,9 @@ dependencies = [
 
 [[package]]
 name = "tzif"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cecffbab91858408738280e7bb6aac788f59a522dda961cd6b15542f0c08559"
+checksum = "e5e762ac355f0c204d09ae644b3d59423d5ddfc5603997d60c8c56f24e429a9d"
 dependencies = [
  "combine",
 ]

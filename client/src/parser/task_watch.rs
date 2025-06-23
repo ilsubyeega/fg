@@ -2,12 +2,13 @@ use notify::{
     Config, EventKind, RecommendedWatcher, Watcher,
     event::{AccessKind, CreateKind, ModifyKind},
 };
-use std::io::SeekFrom;
+use std::io::{ErrorKind, SeekFrom};
 use tokio::{
     fs::OpenOptions,
     io::AsyncReadExt,
     sync::mpsc::{self, Receiver},
 };
+use tracing::{debug, warn};
 
 use tokio::io::{AsyncBufReadExt, AsyncSeekExt, BufReader};
 
@@ -108,7 +109,17 @@ pub async fn read_log_file(
 
     let file_path = file_path.to_owned();
     tokio::spawn(async move {
-        let mut buffer = 0;
+        let mut buffer = match OpenOptions::new().read(true).open(&file_path).await {
+            Ok(file) => file.metadata().await.map(|f| f.len()).unwrap_or(0),
+            Err(err) => {
+                if err.kind() != ErrorKind::NotFound {
+                    warn!("Got error while reading a Player.log length. error: {err:?}");
+                }
+                0
+            }
+        };
+
+        debug!("Initialized Log file buffer: {buffer}");
 
         while let Some(watch_msg) = watch_rx.recv().await {
             if watch_msg == WatchMessage::FileCreated {
@@ -116,11 +127,10 @@ pub async fn read_log_file(
             }
 
             if let WatchMessage::ContentModified { length } = watch_msg {
-                // file length is less than buffer size
+                // file length is less than buffer size. Should reset to 0.
                 if length < buffer {
-                    unreachable!(
-                        "The log file is less than the buffer size. Maybe the file content has been changed? It should be not happened."
-                    );
+                    warn!("File length is less than buffer size. Resetting buffer to 0.");
+                    buffer = 0;
                 }
                 let mut file = OpenOptions::new()
                     .read(true)

@@ -1,4 +1,6 @@
-use temporal_rs::{Instant, PlainTime, Temporal};
+use std::sync::LazyLock;
+
+use temporal_rs::{DateDuration, Duration, Instant, PlainTime, Temporal, TimeZone};
 use tokio::sync::mpsc::{self, Receiver};
 use tracing::warn;
 
@@ -62,64 +64,71 @@ pub async fn parse_from_str_rx(
     rx
 }
 
+static UTC: LazyLock<TimeZone> = LazyLock::new(|| {
+    TimeZone::try_from_identifier_str("Z").expect("Could not create UTC TimeZone")
+});
+static DAY_DURATION: LazyLock<Duration> = LazyLock::new(|| {
+    DateDuration::new(0, 0, 0, 1)
+        .expect("Cannot create duration.")
+        .into()
+});
+
 /// Ensures the log time does not differ between time ranges.
 pub fn try_parse_log_time(log: &str) -> Option<Instant> {
     let re = create_regex(
         r"(?<hours>[0-9]+):(?<minutes>[0-9]+):(?<seconds>[0-9]+).(?<milliseconds>[0-9]+):",
     );
 
+    let zoned_datetime = Temporal::now()
+        .zoned_date_time_iso(Some(UTC.clone()))
+        .expect("Cannot get current zoned datetime in UTC");
     for line in log.lines() {
         let Some(caps) = re.captures(line) else {
             continue;
         };
         // 09:14:00.422
-        let hours = caps.name("hours").unwrap().as_str().parse::<u8>().unwrap();
+        let hours = caps
+            .name("hours")
+            .and_then(|m| m.as_str().parse::<u8>().ok())
+            .expect("Cannot parse from regex capture.");
         let minutes = caps
             .name("minutes")
-            .unwrap()
-            .as_str()
-            .parse::<u8>()
-            .unwrap();
+            .and_then(|m| m.as_str().parse::<u8>().ok())
+            .expect("Cannot parse from regex capture.");
         let seconds = caps
             .name("seconds")
-            .unwrap()
-            .as_str()
-            .parse::<u8>()
-            .unwrap();
+            .and_then(|m| m.as_str().parse::<u8>().ok())
+            .expect("Cannot parse from regex capture.");
         let milliseconds = caps
             .name("milliseconds")
-            .unwrap()
-            .as_str()
-            .parse::<u16>()
-            .unwrap();
+            .and_then(|m| m.as_str().parse::<u16>().ok())
+            .expect("Cannot parse from regex capture.");
 
-        // Let temporal-rs handle the timezone information.
-        // FIXME: timezone detection does not work at sandboxed environments
-        // https://github.com/strawlab/iana-time-zone/issues/170
-        // FIXME: Logs are on UTC format not local timezone, i guesss??????
-        // IT is. has first entry with utc0, and then has other tiemzoned time there.
-        let zoned_date_time = Temporal::now().zoned_date_time_iso(None).unwrap();
-        let Ok(time) = PlainTime::new(hours, minutes, seconds, milliseconds, 0, 0) else {
+        let Ok(plain_time) = PlainTime::new(hours, minutes, seconds, milliseconds, 0, 0) else {
             warn!(
                 "Could not create PlainTime which is {}:{}:{}:{}",
                 hours, minutes, seconds, milliseconds
             );
             continue;
         };
-        let zoned_date_time = match zoned_date_time.with_plain_time(Some(time)) {
-            Ok(time) => time,
-            Err(err) => {
-                //warn!(
-                //    "Could not call ZonedDateTime::with_plain_time which is {}:{}:{}:{}
-                //    Reason: {}.",
-                //    hours, minutes, seconds, milliseconds, err
-                //);
-                continue;
-            }
+
+        let hours_current = zoned_datetime
+            .hour()
+            .expect("Cannot get current hour from zoned_datetime");
+        let zoned_datetime = if hours > hours_current {
+            // Subtract 24 hours if the hours are greater than the current day
+            // to ensure the time is within the current day.
+            zoned_datetime
+                .subtract(&DAY_DURATION, None)
+                .and_then(|d| d.with_plain_time(Some(plain_time)))
+                .expect("Cannot modify zoned_datetime with plain time, -24h")
+        } else {
+            zoned_datetime
+                .with_plain_time(Some(plain_time))
+                .expect("Cannot modify zoned_datetime with plain time")
         };
 
-        let instant = zoned_date_time.to_instant();
-        return Some(instant);
+        return Some(zoned_datetime.to_instant());
     }
 
     None

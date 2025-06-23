@@ -106,7 +106,7 @@ fn initialize_extra_data_assets() -> FGExtraDataAssets {
     for item in game_rules_vec {
         game_rules.insert(item.id.clone(), item);
     }
-    
+
     let mut levels_round = HashMap::new();
     for item in round_item {
         levels_round.insert(item.id.clone(), item);
