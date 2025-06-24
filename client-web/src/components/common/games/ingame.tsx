@@ -21,6 +21,7 @@ export type AttributesProps = {
   timeLeftText?: string;
   qualifiedPlayers?: number;
   qualifiedMaxPlayers?: number;
+  ping?: number;
 };
 
 export const defaultAttributesProps: AttributesProps = {
@@ -31,6 +32,7 @@ export const defaultAttributesProps: AttributesProps = {
   timeLeftText: "00:30",
   qualifiedPlayers: 5,
   qualifiedMaxPlayers: 10,
+  ping: 4,
 };
 
 export const Header: Component<{
@@ -91,6 +93,12 @@ export const Attributes: Component<AttributesProps> = (props) => {
           {!props.qualifiedMaxPlayers
             ? props.qualifiedPlayers
             : `${props.qualifiedPlayers} / ${props.qualifiedMaxPlayers}`}
+        </div>
+      </Show>
+      <Show when={props.ping}>
+        <div class="ping">
+          <img src="/icons/lucide-icons/ingame/ping.svg" />
+          {props.ping} ms
         </div>
       </Show>
     </div>
