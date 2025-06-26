@@ -1,5 +1,5 @@
 [package]
-name = "fg-telemetry-client"
+name = "fg-daemon"
 version = "0.0.0"
 edition = "2024"
 
