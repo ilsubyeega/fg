@@ -12,7 +12,7 @@ async fn main() {
     dotenvy::dotenv().unwrap();
     tracing_subscriber::fmt()
         .with_target(true)
-        .with_max_level(Level::TRACE)
+        .with_max_level(Level::DEBUG)
         .init();
 
     let log_dir = &env::var("LOG_DIR").unwrap();

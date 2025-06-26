@@ -50,8 +50,8 @@ export const Header: Component<{
 export const Title: Component<TitleProps> = (props) => {
   return (
     <div
+      class="common-games-ingame-title"
       classList={{
-        "common-games-ingame-title": true,
         "is-creative": props.isCreative,
       }}
     >
@@ -67,8 +67,8 @@ export const Title: Component<TitleProps> = (props) => {
 export const Attributes: Component<AttributesProps> = (props) => {
   return (
     <div
+      class="common-games-ingame-attributes"
       classList={{
-        "common-games-ingame-attributes": true,
         "is-available": props.isAvailable,
       }}
     >
