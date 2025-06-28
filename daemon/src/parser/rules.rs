@@ -561,7 +561,7 @@ fn game_lobby_rewards(input: &str) -> ParseResult<FGGameMessage> {
             break;
         }
 
-        if line.contains("[") && line.contains("Round ") && line.contains("]") {
+        if line.contains("[") && line.contains("Round ") && line.contains(" | ") && line.contains("]") {
             if round_order != -1 {
                 rounds.push(temp_round);
                 temp_round = generate_fg_completed_episode_dto_round();
@@ -578,8 +578,8 @@ fn game_lobby_rewards(input: &str) -> ParseResult<FGGameMessage> {
             temp_round.round_display_name = localized_string_round_id(&round_id_str);
         } else if line.contains("> ") && line.contains(": ") {
             let Some(caps) = prop_regex.captures(line) else {
-                warn!("line: {}", line);
-                return ParseResult::Unreachable;
+                warn!("out of scope: {}", line);
+                break;
             };
             let key = caps.name("key").unwrap().as_str();
             let value = caps.name("value").unwrap().as_str();
