@@ -1,0 +1,18 @@
+p.utilities-clock {
+    // Font rendering sucks that tubular mode only exists in
+    // feature available font.
+    span.num,
+    span.dec,
+    span.char {
+        display: inline-block;
+        text-align: center;
+    }
+
+    span.num {
+        width: var(--clock-num-width, 11px);
+    }
+
+    span.dec {
+        width: var(--clock-dec-width, 8px);
+    }
+}
