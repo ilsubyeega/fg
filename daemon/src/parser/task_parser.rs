@@ -133,3 +133,15 @@ pub fn try_parse_log_time(log: &str) -> Option<Instant> {
 
     None
 }
+
+pub enum ParserState {
+    /// Get new line from it.
+    NewContent,
+    /// Needs more line.
+    RequiresMoreLine(String),
+    /// Parse this line, thrown from rules.rs
+    /// Usually from multiple-line parsing and then does not required for that.
+    ParseLine(String),
+    /// Vector of ParseLine
+    ParseLines(Vec<String>),
+}
