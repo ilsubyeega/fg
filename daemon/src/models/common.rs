@@ -1,30 +1,47 @@
+//! Common types used throughout the Fall Guys daemon.
+//!
+//! This module contains shared data types that are used across multiple
+//! components of the log parser.
+
 use std::{fmt::Display, str::FromStr};
 
 use crate::extra_data::{EXTRA_DATA_ASSETS, localized_string_round_id, localized_string_show_id};
 
+// =============================================================================
+// Game Mode
+// =============================================================================
+
+/// The game mode/show type.
+///
+/// Represents the different playlists/modes available in Fall Guys.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-
-/// The Game Mode enum.
 pub enum FGGameMode {
+    /// Standard elimination mode.
     Knockout,
+    /// Competitive ranked mode.
     RankedKnockout,
-
+    /// Classic solo show.
     ClassicSolo,
+    /// Classic duos show (2-player squads).
     ClassicDuo,
+    /// Classic squads show (4-player squads).
     ClassicSquads,
-
+    /// Casual exploration mode.
     Explore,
+    /// Community-created content spotlight.
     CreatorSpotlight,
-
-    /// The extra modes.
-    /// Can parsed with `shows` data.
+    /// Extra modes from `shows.json`.
+    ///
+    /// These are limited-time or special event modes.
     Extra {
+        /// Localized display name.
         name: String,
+        /// Internal identifier.
         id: String,
     },
-    /// We don't know this gamemode, but try to fallback parse then use it if possible.
+    /// Unknown mode that was assumed based on name patterns.
     UnknownAssumed(Box<FGGameMode>, String),
-    /// If UnknownAssumed fails, this will throw.
+    /// Completely unknown mode.
     Unknown(String),
 }
 
@@ -97,20 +114,41 @@ impl Display for FGGameMode {
     }
 }
 
-/// The Player ID seems to be number, but for sure, let's use String as a fallback.
-pub type FGPlayerId = isize;
-/// When loading a player, NetPlayerID is incremented by 1, but PlayerID is not.
-pub type FGNetPlayerId = isize;
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+// =============================================================================
+// Player IDs
+// =============================================================================
 
-/// The round data.
+/// Player identifier assigned by the game.
+pub type FGPlayerId = isize;
+
+/// Network player identifier (increments as players join).
+///
+/// Note: `FGNetPlayerId` increments by 1 when loading a player,
+/// but `FGPlayerId` does not.
+pub type FGNetPlayerId = isize;
+
+// =============================================================================
+// Round Info
+// =============================================================================
+
+/// Information about a game round.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FGRoundInfo {
+    /// Internal round identifier (e.g., "round_tunnel_40").
     pub id: String,
-    /// The display name. Should be retrived from the `levels_round` data.
+    /// Human-readable display name.
     pub display_name: String,
 }
+
 impl FGRoundInfo {
-    /// id: e.g `round_tunnel_40`
+    /// Creates round info from a string ID.
+    ///
+    /// For UGC (user-generated content) rounds, creates a placeholder name.
+    /// For standard rounds, looks up the localized name.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The round identifier (e.g., "round_tunnel_40" or "ugc-12345")
     pub fn from_str_id(id: &str) -> Self {
         if id.starts_with("ugc-") {
             FGRoundInfo {
@@ -126,32 +164,38 @@ impl FGRoundInfo {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-/// The Fall Guys platform. Can retrived via `settings_matchmaking_multiplay` data.
-pub enum FGPlatform {
-    /// pc_egs
-    PCEpicGamesStore,
-    /// pc_steam
-    PCSteam,
-    /// pc_standalone
-    PCStandalone,
-    /// switch
-    Switch,
-    /// xb1
-    XboxOne,
-    /// xsx
-    XboxSeriesX,
-    /// ps4
-    PlayStation4,
-    /// ps5
-    PlayStation5,
-    /// android_standalone
-    AndroidStandalone,
-    /// android_ega
-    AndroidEpicGamesAccount,
-    /// ios_ega
-    IOSEpicGamesAccount,
+// =============================================================================
+// Platform
+// =============================================================================
 
+/// Player's gaming platform.
+///
+/// Identifies which platform a player is using to play Fall Guys.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum FGPlatform {
+    /// Epic Games Store (PC).
+    PCEpicGamesStore,
+    /// Steam (PC).
+    PCSteam,
+    /// Standalone PC client.
+    PCStandalone,
+    /// Nintendo Switch.
+    Switch,
+    /// Xbox One.
+    XboxOne,
+    /// Xbox Series X|S.
+    XboxSeriesX,
+    /// PlayStation 4.
+    PlayStation4,
+    /// PlayStation 5.
+    PlayStation5,
+    /// Android standalone.
+    AndroidStandalone,
+    /// Android with Epic Games account.
+    AndroidEpicGamesAccount,
+    /// iOS with Epic Games account.
+    IOSEpicGamesAccount,
+    /// Unknown platform.
     Unknown(Option<String>),
 }
 
@@ -176,15 +220,31 @@ impl FromStr for FGPlatform {
     }
 }
 
-pub type FGCreativeShareCode = String;
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+// =============================================================================
+// Creative Share Code
+// =============================================================================
 
+/// Share code for user-generated creative content.
+pub type FGCreativeShareCode = String;
+
+// =============================================================================
+// Round Badge
+// =============================================================================
+
+/// Badge awarded at the end of a round.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum FGRoundBadge {
+    /// First place / top tier.
     Gold,
+    /// Second tier.
     Silver,
+    /// Third tier.
     Bronze,
+    /// No badge (qualified but no special placement).
     None,
+    /// Failed / eliminated.
     Fail,
+    /// Unknown badge type.
     Unknown(Option<String>),
 }
 

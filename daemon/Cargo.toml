@@ -1,18 +1,43 @@
 [package]
 name = "fg-daemon"
-version = "0.0.0"
+version = "0.1.0"
 edition = "2024"
+description = "A daemon for parsing Fall Guys game logs and tracking game state"
+authors = ["ilsubyeega"]
 
 [dependencies]
-cached = { version = "0.55.1", features = ["tokio"] }
-dotenvy = "0.15.7"
+# Async runtime
+tokio = { version = "1.45.1", features = ["full"] }
+
+# Parsing
+nom = "8"
+
+# Serialization
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = { version = "1.0.140", features = ["raw_value"] }
+
+# Error handling
+anyhow = "1"
+thiserror = "1"
+
+# Enum utilities
+strum = { version = "0.26", features = ["derive"] }
+
+# File watching
 notify = "8.0.0"
-regex = "1.11.1"
-serde = { version = "1.0.219", features = ["alloc", "derive"] }
-serde_json = { version = "1.0.140", features = ["alloc", "raw_value"] }
+
+# Logging
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
+
+# Time handling
 temporal_rs = { git = "https://github.com/boa-dev/temporal", rev = "531cee14769e8c077c59a1faf67d5465e85f5afa", features = [
     "compiled_data",
 ] }
-tokio = { version = "1.45.1", features = ["full"] }
-tracing = "0.1.41"
-tracing-subscriber = "0.3.19"
+
+# Environment
+dotenvy = "0.15.7"
+
+[dev-dependencies]
+tokio-test = "0.4"
+pretty_assertions = "1"
